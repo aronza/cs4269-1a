@@ -1,6 +1,7 @@
 import sys
 import course_dictionary
 
+# TODO: Implement/Extend Unit testing for course_scheduler function
 def main(argv):
     test = course_dictionary.create_course_dict()
     #Test to see if all prereqs are in the file.
@@ -17,10 +18,10 @@ def main(argv):
         if key in [course for prereq in test[key].prereqs for course in prereq]:
             print(key);
     # Prints all the CS courses.
-    for key in test:
-        if key.program == 'CS':
-            print(key, test[key])
-    #Prints the entire dictionary.
+    # for key in test:
+    #     if key.program == 'CS':
+    #         print(key, test[key])
+    # Prints the entire dictionary.
     # course_dictionary.print_dict(test)
     # print(test[('CS', 'open3')])
     print('Done')
