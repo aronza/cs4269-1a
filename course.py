@@ -1,31 +1,31 @@
-from course_dictionary import create_course_dict
-
-# TODO: Parses all the entries of the dictionary from course_dictionary to Course class and returns another dictionary.
-def parseDictionary():
-    courses = create_course_dict()
-
 # TODO: Define publicly available enums to map string names like program (CS, HOD, ECON), possible terms(which terms
 #  this course can be taken in like Fall, Spring), scheduling terms (Freshman Fall to Senior Spring) and any other
 #  that makes sense to number IDs.
+from collections import namedtuple
+
 
 class Course:
 
+    CourseName = namedtuple('Course', 'program, designation')
+    CourseInfo = namedtuple('CourseInfo', 'credits, terms, prereqs')
+
     # TODO: Takes an entry from course_dictionary and parses it.
-    def __init__(self, course_entry):
-        self.program = 0
+    def __init__(self, course_key=CourseName('', ''), course_entry=CourseInfo(0, 'Fall', [])):
+        self.key = course_key
+        self.value = course_entry
         self.scheduled_term = -1
-        
+
     #  TODO: Return a list of Course(this class) classes that this course requires
     def requirements(self):
         return 0
 
     # TODO: Return number of credits for the course
     def credit(self):
-        return 0
+        return self.value.credits
 
     # TODO: Return the program ID for the course
     def program(self):
-        return 0
+        return self.key.program
 
     # TODO: Return the ID for the course
     def number(self):
@@ -42,5 +42,3 @@ class Course:
     # TODO: Parse the Course object to String to be printed.
     def __str__(self):
         return "foo"
-
-
