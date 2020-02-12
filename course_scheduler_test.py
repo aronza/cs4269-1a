@@ -2,6 +2,8 @@ import sys
 
 import re
 from collections import namedtuple
+from pprint import pprint
+
 from openpyxl import load_workbook
 
 from course_scheduler import course_scheduler
@@ -81,13 +83,14 @@ def main(argv):
     # print(test[('CS', 'open3')])
     # print('Done')
 
-    goal = [('CS', 'depth')]
+    goal = [('CS', 'major')]
     courses_taken = []
     print("First search: ")
     print("Goal: " + str(goal))
     print("Initial State: " + str(courses_taken))
     print()
     schedule = course_scheduler(course_descriptions=test, goal_conditions=goal, initial_state=courses_taken)
+    print()
     print("Result:")
     print(schedule)
 
