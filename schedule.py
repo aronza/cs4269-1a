@@ -15,7 +15,7 @@ class Schedule:
                           8: set()}
 
     def get_prereqs(self, course):
-        return self.dict.get(course).prereqs
+        return self.dict[course].prereqs
 
     def get_credits(self, course):
         return int(self.dict[course].credits)

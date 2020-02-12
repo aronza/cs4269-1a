@@ -23,9 +23,6 @@ def append_to_queue(frontier, courses):
 
 
 def search(frontier, schedule):
-    scheduled = deepcopy(schedule.scheduled)
-    courses_taken = deepcopy(schedule.courses_taken)
-    old_frontier = deepcopy(frontier)
 
     while frontier:  # AND
         log()
@@ -56,10 +53,8 @@ def search(frontier, schedule):
 
         if not schedule.schedule(course):
             log("Couldn't schedule " + str(course))
-            pprint(schedule.scheduled)
-            schedule.scheduled = scheduled
-            schedule.courses_taken = courses_taken
-            frontier = old_frontier
+            log(schedule)
+
             return False
         log("New Schedule")
         log(schedule)
