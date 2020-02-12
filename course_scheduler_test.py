@@ -81,14 +81,15 @@ def main(argv):
     # print(test[('CS', 'open3')])
     # print('Done')
 
-    goal = [('CS', 'major'), ('BSCI', 'major'), ('CS', '4269'), ('ENGL', '3728W')]
-    courses_taken = [Course('CS', '1101')]
+    goal = [('CS', 'depth')]
+    courses_taken = []
     print("First search: ")
     print("Goal: " + str(goal))
     print("Initial State: " + str(courses_taken))
     print()
-
-    course_scheduler(course_descriptions=test, goal_conditions=goal, initial_state=courses_taken)
+    schedule = course_scheduler(course_descriptions=test, goal_conditions=goal, initial_state=courses_taken)
+    print("Result:")
+    print(schedule)
 
 if __name__ == "__main__":
     main(sys.argv)

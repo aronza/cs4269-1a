@@ -1,7 +1,5 @@
 
-def course_heuristic(goal_conditions, course):
+def course_heuristic(schedule, goal_conditions, course):
 
-    if course.program() == goal_conditions.program():
-        return 1
     return 0
 
