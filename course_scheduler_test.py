@@ -76,14 +76,15 @@ def main(argv):
 
     # # Prints all the CS courses.
     # for key in test:
-    #     if key.program == 'CS':
-    #         print(key, test[key])
-    # # Prints the entire dictionary.
+    #     print(key, test[key])
+
+
+    # Prints the entire dictionary.
     # print_dict(test)
     # print(test[('CS', 'open3')])
     # print('Done')
 
-    goal = [('CS', 'major'), ('CHEM', '4050')]
+    goal = [('CS', 'major')]
     courses_taken = []
     print("First search: ")
     print("Goal: " + str(goal))
