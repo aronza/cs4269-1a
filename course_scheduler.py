@@ -37,7 +37,6 @@ def search(frontier, schedule):
         # log("Sub-goal possible prerequisites")
         # log(possible_prerequisites)
 
-        tried = 0
         for prerequisites in possible_prerequisites:  # OR
             # log("Trying prerequisites:")
             # log(prerequisites)
@@ -46,16 +45,27 @@ def search(frontier, schedule):
             log("Filtered prerequisites")
             log(str(prerequisites))
 
+            frontier_old = deepcopy(frontier)
+            scheduled_old = deepcopy(schedule.scheduled)
+            courses_taken_old = deepcopy(schedule.courses_taken)
+
             append_to_queue(frontier, prerequisites)
 
             if search(frontier, schedule):
                 break
+            else:
+                frontier = frontier_old
+                schedule.courses_taken = courses_taken_old
+                schedule.scheduled = scheduled_old
+                log("Child returned false")
 
         if not schedule.schedule(course):
             log("Couldn't schedule " + str(course))
             log(schedule)
 
             return False
+
+        log("Scheduled new course " + str(course))
         log("New Schedule")
         log(schedule)
 

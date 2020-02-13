@@ -83,7 +83,7 @@ def main(argv):
     # print(test[('CS', 'open3')])
     # print('Done')
 
-    goal = [('CS', 'major')]
+    goal = [('CS', 'major'), ('CHEM', '4050')]
     courses_taken = []
     print("First search: ")
     print("Goal: " + str(goal))
