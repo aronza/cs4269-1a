@@ -6,6 +6,7 @@ CourseInfo = namedtuple('CourseInfo', 'credits, terms, prereqs')
 course_translation = {1: 'Frosh', 3: 'Soph', 5: 'Junior', 7: 'Senior'}
 season_translation = {0: 'Spring', 1: 'Fall'}
 max_semester = 8
+MAX_CREDITS = 18
 
 
 def find_elective_groups(catalog):
@@ -137,7 +138,7 @@ class Schedule:
         """
         plan = []
 
-        for semester in range(1, max_semester):
+        for semester in range(1, max_semester + 1):
             for course in self.scheduled[semester]:
                 plan.append((course, get_scheduled_term(semester), self.get_credits(course)))
         return plan
@@ -168,7 +169,7 @@ class Schedule:
         return False
 
     def __can_schedule(self, course, semester):
-        return self.get_total_credits(semester) + self.get_credits(course) <= 18 and course not in self.courses_taken \
+        return self.get_total_credits(semester) + self.get_credits(course) <= MAX_CREDITS and course not in self.courses_taken \
                and self.__is_course_offered(course, semester % 2)
 
     def copy(self):
@@ -180,7 +181,7 @@ class Schedule:
     def __str__(self):
         schedule_str = ""
 
-        for i in range(1, 9):
+        for i in range(1, max_semester + 1):
             schedule_str += str(get_scheduled_term(i)) + ": "
             schedule_str += str(list(filter(lambda course: not self.is_high_level(course), self.scheduled[i])))
             schedule_str += " Credits: " + str(self.get_total_credits(i))

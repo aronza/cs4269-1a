@@ -4,7 +4,7 @@ import heapq
 from course_heuristic import course_heuristic
 from schedule import Schedule
 
-DEBUG = len(sys.argv) > 1
+DEBUG = (sys.argv[1] == "debug") if len(sys.argv) > 1 else False
 
 
 def log(msg=""):
@@ -99,9 +99,8 @@ def course_scheduler(course_descriptions, goal_conditions, initial_state):
         When conjunction set is empty a viable schedule should be in the schedule_set.
     """
     schedule = Schedule(course_descriptions, initial_state)
-
     frontier = []
     append_to_queue(frontier, goal_conditions)
-
-    return schedule if search(frontier, schedule) else "No solution Found"
+    search(frontier, schedule)
+    return schedule.get_plan()
 
