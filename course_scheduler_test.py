@@ -93,7 +93,10 @@ def main(argv):
     schedule = course_scheduler(course_descriptions=test, goal_conditions=goal, initial_state=courses_taken)
     print()
     print("Result:")
-    print(schedule)
+    if type(schedule) is list:
+        pprint(schedule)
+    else:
+        print(schedule)
 
 if __name__ == "__main__":
     main(sys.argv)

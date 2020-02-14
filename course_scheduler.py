@@ -1,7 +1,5 @@
-from pprint import pprint
 import sys
 import heapq
-from copy import deepcopy
 
 from course_heuristic import course_heuristic
 from schedule import Schedule
@@ -28,65 +26,67 @@ def append_to_queue(frontier, courses):
 
 
 def search(frontier, schedule):
+    """
+    Searches for a viable schedule to contain goal conditions in frontier. Recursive calls are made to schedule
+     requirements. Requirements are given as new goal conditions
+
+    :param frontier: Priority queue holding all the courses that have to be scheduled to fulfill goal_conditions
+    :param schedule: Schedule object that holds course catalog information and storage for courses found and stored so
+    far.
+    :return: True if a scheduled found to fulfill all goal conditions, false if none can be found.
+    """
     while frontier:  # AND
         log()
         log("Frontier")
         log(frontier)
 
-        node = heapq.heappop(frontier)
-        course = node[1]
+        course = heapq.heappop(frontier)[1]
         log("Sub-goal chosen")
         log(course)
 
         possible_prerequisites = schedule.get_prereqs(course)
         chosen_prerequisites = None
 
+        """
+            Try all possible sets of prerequisites for the current course
+        """
         for prerequisites in possible_prerequisites:  # OR
             """ 
                 If this is an elective and we already have this specific requirement than look for another            
             """
-            if schedule.is_elective(course) and set(prerequisites) - schedule.courses_taken == set():
-                   # schedule.have_elective_course(course, prerequisites):
+            if schedule.is_elective(course) and set(prerequisites).issubset(schedule.courses_taken):
                 continue
 
-            prerequisites = list(set(prerequisites) - schedule.courses_taken)
+            prerequisites = set(prerequisites).difference(schedule.courses_taken)
 
             """ 
                 If we already satisfy all the requirement for this course, we can go ahead and schedule it.            
             """
             if not prerequisites:
                 break
-            log("Trying Prerequisite")
-            log(str(prerequisites))
 
-            scheduled_old = deepcopy(schedule.scheduled)
-            courses_taken_old = deepcopy(schedule.courses_taken)
-
+            schedule_copy = schedule.copy()
             new_frontier = []
             append_to_queue(new_frontier, prerequisites)
+
+            log("Trying Prerequisite")
+            log(str(prerequisites))
 
             if search(new_frontier, schedule):
                 chosen_prerequisites = prerequisites
                 break
             else:
-                schedule.courses_taken = courses_taken_old
-                schedule.scheduled = scheduled_old
+                schedule.assign(schedule_copy)
                 log("Child returned false")
 
         """ By here we either have the requirements for this course or tried all possible requirement for this course. 
             If we still can't schedule it, then we failed to schedule it and must return False up the tree
         """
-        if not schedule.schedule(course):
+        if not schedule.schedule(course, chosen_prerequisites):
             log("Couldn't schedule " + str(course))
             log(schedule)
             return False
 
-        """ If the course we scheduled is a high-level elective requirement, then we want to store the course we used
-            to fulfill this elective requirement so that the course is not used again for the same elective.
-        """
-        if schedule.is_elective(course):
-            schedule.add_elective_course(course, chosen_prerequisites)
-        log("Scheduled new course " + str(course))
         log("New Schedule")
         log(schedule)
 
