@@ -104,3 +104,4 @@ def course_scheduler(course_descriptions, goal_conditions, initial_state):
     append_to_queue(frontier, goal_conditions)
 
     return schedule if search(frontier, schedule) else "No solution Found"
+
