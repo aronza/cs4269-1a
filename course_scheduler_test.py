@@ -74,7 +74,7 @@ def test(test_file_path, expected_result):
 
 
 def main(argv):
-    test = create_course_dict("data/test_cases/test_one_solution.xlsx")
+    test = create_course_dict()
 
     # Test to see if all prereqs are in the file.
     prereq_list = [single_course for vals in test.values()
