@@ -105,14 +105,8 @@ class Schedule:
         return False
 
     def __can_schedule(self, course, semester):
-        return self.get_total_credits(semester) + self.get_credits(course) <= 18 and self.not_have_course(course) \
+        return self.get_total_credits(semester) + self.get_credits(course) <= 18 and course not in self.courses_taken \
                and self.__is_course_offered(course, semester % 2)
-
-    def not_have_course(self, course):
-        for key in self.scheduled:
-            if course in self.scheduled[key]:
-                return False
-        return True
 
     def __str__(self):
         schedule_str = ""

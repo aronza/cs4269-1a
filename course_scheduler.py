@@ -10,19 +10,24 @@ DEBUG = len(sys.argv) > 1
 
 
 def log(msg=""):
+    """
+    Helper Function to print out a debugging message if DEBUG mode is on. (Any parameters are given to program)
+    """
     if DEBUG:
         print(msg)
 
 
-def append_to_queue(frontier, courses, depth):
+def append_to_queue(frontier, courses):
+    """
+        Add a list of courses to the search queue after assigning each a heuristic value
+    """
     for course in courses:
         if course not in frontier:
-            # Calculate the heuristic of each sub-goal and queue them.
-            value = course_heuristic(frontier, course) - depth
+            value = course_heuristic(frontier, course)
             heapq.heappush(frontier, (value, course))
 
 
-def search(frontier, schedule, depth):
+def search(frontier, schedule):
     while frontier:  # AND
         log()
         log("Frontier")
@@ -32,56 +37,59 @@ def search(frontier, schedule, depth):
         course = node[1]
         log("Sub-goal chosen")
         log(course)
+
         possible_prerequisites = schedule.get_prereqs(course)
         chosen_prerequisites = None
-        # if schedule.is_high_level(course)
 
         for prerequisites in possible_prerequisites:  # OR
-            # If this is an elective and we already have this specific requirement than look for another
-            if schedule.is_elective(course) and schedule.have_elective_course(course, prerequisites):
+            """ 
+                If this is an elective and we already have this specific requirement than look for another            
+            """
+            if schedule.is_elective(course) and set(prerequisites) - schedule.courses_taken == set():
+                   # schedule.have_elective_course(course, prerequisites):
                 continue
 
             prerequisites = list(set(prerequisites) - schedule.courses_taken)
 
-            # If we already satisfy all the requirement for this course, we can go ahead and schedule it.
+            """ 
+                If we already satisfy all the requirement for this course, we can go ahead and schedule it.            
+            """
             if not prerequisites:
                 break
             log("Trying Prerequisite")
             log(str(prerequisites))
 
-            frontier_old = deepcopy(frontier)
             scheduled_old = deepcopy(schedule.scheduled)
             courses_taken_old = deepcopy(schedule.courses_taken)
 
-            new_depth = depth
-            if not schedule.is_high_level(course):
-                new_depth += 1
-
             new_frontier = []
-            append_to_queue(new_frontier, prerequisites, new_depth)
+            append_to_queue(new_frontier, prerequisites)
 
-            if search(new_frontier, schedule, new_depth):
+            if search(new_frontier, schedule):
                 chosen_prerequisites = prerequisites
                 break
             else:
-                frontier = frontier_old
                 schedule.courses_taken = courses_taken_old
                 schedule.scheduled = scheduled_old
                 log("Child returned false")
 
+        """ By here we either have the requirements for this course or tried all possible requirement for this course. 
+            If we still can't schedule it, then we failed to schedule it and must return False up the tree
+        """
         if not schedule.schedule(course):
             log("Couldn't schedule " + str(course))
             log(schedule)
-
             return False
 
+        """ If the course we scheduled is a high-level elective requirement, then we want to store the course we used
+            to fulfill this elective requirement so that the course is not used again for the same elective.
+        """
         if schedule.is_elective(course):
             schedule.add_elective_course(course, chosen_prerequisites)
         log("Scheduled new course " + str(course))
         log("New Schedule")
         log(schedule)
 
-    # If I schedule everything on the frontier and nothing is left to search, we succeeded
     return True
 
 
@@ -93,6 +101,6 @@ def course_scheduler(course_descriptions, goal_conditions, initial_state):
     schedule = Schedule(course_descriptions, initial_state)
 
     frontier = []
-    append_to_queue(frontier, goal_conditions, 0)
+    append_to_queue(frontier, goal_conditions)
 
-    return schedule if search(frontier, schedule, 0) else "No solution Found"
+    return schedule if search(frontier, schedule) else "No solution Found"
