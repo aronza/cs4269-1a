@@ -3,6 +3,7 @@ import heapq
 
 from course_heuristic import course_heuristic
 from schedule import Schedule
+from tree import Tree
 
 DEBUG = (sys.argv[1] == "debug") if len(sys.argv) > 1 else False
 
@@ -99,8 +100,20 @@ def course_scheduler(course_descriptions, goal_conditions, initial_state):
         When conjunction set is empty a viable schedule should be in the schedule_set.
     """
     schedule = Schedule(course_descriptions, initial_state)
+    print("this is my tree\n")
+
+
+    myRoot = Tree("Root Node")
+    myLength = len(goal_conditions)
+    if myLength > 1:
+        for condition in goal_conditions:
+            myRoot.add_child(schedule.build_prereq_tree([condition]))
+    else:
+        myRoot = schedule.build_prereq_tree(goal_conditions)
+
+
+    print(myRoot.calculate_depth())
     frontier = []
     append_to_queue(frontier, goal_conditions)
     search(frontier, schedule)
     return schedule.get_plan()
-

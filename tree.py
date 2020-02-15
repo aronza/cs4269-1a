@@ -12,13 +12,15 @@ class Tree(object):
             return False;
         return True;
 
-    def get_depth(self):
+
+
+    def calculate_depth(self):
         if not self.has_children():
-            return 0
+            return 1
         else:
             maxDepth = 0
             for allChildren in self.children:
-                newMax = allChildren.get_depth()
+                newMax = allChildren.calculate_depth()
                 if newMax > maxDepth:
                     maxDepth = newMax
             return 1 + maxDepth

@@ -99,7 +99,7 @@ def main(argv):
     # print(test[('CS', 'open3')])
     # print('Done')
 
-    goal = [('CS', 'major')]
+    goal = [('CS', 'core'), ('CS', 'major')]
     courses_taken = []
     print("First search: ")
     print("Goal: " + str(goal))

@@ -1,5 +1,7 @@
 from collections import namedtuple
 from copy import deepcopy
+from tree import Tree
+from itertools import chain
 
 Course = namedtuple('Course', 'program, designation')
 CourseInfo = namedtuple('CourseInfo', 'credits, terms, prereqs')
@@ -8,6 +10,14 @@ season_translation = {0: 'Spring', 1: 'Fall'}
 max_semester = 8
 MAX_CREDITS = 18
 
+
+def flatten (list):
+    toReturn = set()
+    for prereqs in list:
+        for course in prereqs:
+            print course
+            toReturn.add(course)
+    return toReturn
 
 def find_elective_groups(catalog):
     """
@@ -33,6 +43,7 @@ def find_elective_groups(catalog):
             groups.append(reverse_catalog[key])
 
     return groups
+
 
 
 def get_scheduled_term(semester):
@@ -132,10 +143,6 @@ class Schedule:
         return total
 
     def get_plan(self):
-        """
-        :return: Returns the scheduled courses in expected (course_key, semester_scheduled, credits)
-         Ex: ((“CS”, “2201”), (“Spring”, “Frosh”), 3).
-        """
         plan = []
 
         for semester in range(1, max_semester + 1):
@@ -190,6 +197,21 @@ class Schedule:
             schedule_str += '\n'
 
         return schedule_str
+
+    def build_prereq_tree(self, goal_conditions):
+        for course in goal_conditions:
+            prereqs = self.get_prereqs(course)
+            root = Tree(course)
+            prereqSet = flatten(prereqs)
+            if prereqSet == set():
+                return root
+            else:
+                for prereq in prereqSet:
+                    # if not self.is_elective(prereq):
+                        toAdd = self.build_prereq_tree([prereq])
+                        root.add_child(toAdd)
+                return root
+
 
     # def have_elective_course(self, elective, courses):
     #     """
