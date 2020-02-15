@@ -11,11 +11,11 @@ max_semester = 8
 MAX_CREDITS = 18
 
 
+
 def flatten (list):
     toReturn = set()
     for prereqs in list:
         for course in prereqs:
-            print course
             toReturn.add(course)
     return toReturn
 
@@ -64,6 +64,7 @@ class Schedule:
         self.dict = course_catalog
         # Groups of high-level elective groups that must be satisfied by different courses.
         self.elective_groups = find_elective_groups(self.dict)
+        self.heuristic_dictionary = {}
 
         # List of sets of courses scheduled for self.elective_groups
         self.electives_taken = [set() for i in range(len(self.elective_groups))]
@@ -204,12 +205,18 @@ class Schedule:
             root = Tree(course)
             prereqSet = flatten(prereqs)
             if prereqSet == set():
+                root.max_depth = 1
+                self.heuristic_dictionary[course] = root.max_depth
                 return root
             else:
+                depths = []
                 for prereq in prereqSet:
                     # if not self.is_elective(prereq):
                         toAdd = self.build_prereq_tree([prereq])
                         root.add_child(toAdd)
+                        depths.append(toAdd.max_depth + 1)
+                root.max_depth = max(depths)
+                self.heuristic_dictionary[prereq] = root.max_depth
                 return root
 
 

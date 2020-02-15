@@ -16,13 +16,13 @@ def log(msg=""):
         print(msg)
 
 
-def append_to_queue(frontier, courses):
+def append_to_queue(frontier, courses, heuristic_dictionary):
     """
         Add a list of courses to the search queue after assigning each a heuristic value
     """
     for course in courses:
         if course not in frontier:
-            value = course_heuristic(frontier, course)
+            value = course_heuristic(heuristic_dictionary, course)
             heapq.heappush(frontier, (value, course))
 
 
@@ -68,7 +68,7 @@ def search(frontier, schedule):
 
             schedule_copy = schedule.copy()
             new_frontier = []
-            append_to_queue(new_frontier, prerequisites)
+            append_to_queue(new_frontier, prerequisites, schedule.heuristic_dictionary)
 
             log("Trying Prerequisite")
             log(str(prerequisites))
@@ -100,20 +100,26 @@ def course_scheduler(course_descriptions, goal_conditions, initial_state):
         When conjunction set is empty a viable schedule should be in the schedule_set.
     """
     schedule = Schedule(course_descriptions, initial_state)
-    print("this is my tree\n")
 
 
-    myRoot = Tree("Root Node")
+    my_root = Tree("Root Node")
     myLength = len(goal_conditions)
+    max_depth = 0
     if myLength > 1:
         for condition in goal_conditions:
-            myRoot.add_child(schedule.build_prereq_tree([condition]))
+            toAdd = schedule.build_prereq_tree([condition])
+            my_root.add_child(toAdd)
+            new_depth = toAdd.get_depth()
+            if new_depth > max_depth:
+                max_depth = new_depth
     else:
-        myRoot = schedule.build_prereq_tree(goal_conditions)
+        my_root = schedule.build_prereq_tree(goal_conditions)
+        max_depth = my_root.get_depth()
+
+    # print (schedule.heuristic_dictionary[('CS', 'major')])
 
 
-    print(myRoot.calculate_depth())
     frontier = []
-    append_to_queue(frontier, goal_conditions)
+    append_to_queue(frontier, goal_conditions, schedule.heuristic_dictionary)
     search(frontier, schedule)
     return schedule.get_plan()
