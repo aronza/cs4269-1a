@@ -70,6 +70,10 @@ def test(test_file_path, expected_result):
             return courses_scheduled == set()
         if expected_result == "have_all":
             return catalog.keys() == courses_scheduled
+        if expected_result == "have_subset":
+            expectedPrograms = ['A', 'B', 'C', 'CS']
+            expectedCourses = set(filter(lambda course: course.program in expectedPrograms, catalog.keys()))
+            return expectedCourses.issubset(courses_scheduled)
         raise NameError(expected_result + " is not a valid test option")
 
 
@@ -89,15 +93,6 @@ def main(argv):
         # Test to see if a course's prereqs include the course itself
         if key in [course for prereq in test[key].prereqs for course in prereq]:
             print(key)
-
-    # # Prints all the CS courses.
-    # for key in test:
-    #     print(key, test[key])
-
-    # Prints the entire dictionary.
-    # print_dict(test)
-    # print(test[('CS', 'open3')])
-    # print('Done')
 
     goal = [('CS', 'major')]
     courses_taken = []
@@ -126,6 +121,8 @@ if __name__ == "__main__":
             expected = None
             if test_filename == "test_no_solution.xlsx":
                 expected = "empty"
+            elif test_filename == "test_extra_classes.xlsx":
+                expected = "have_subset"
             else:
                 expected = "have_all"
 
