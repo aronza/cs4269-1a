@@ -94,17 +94,23 @@ class Schedule:
             return True
 
         for i in range(1, max_semester + 1):
-            if self.__can_schedule(course, i) and self.__requirements_satisfied(course, i):
-                self.scheduled[i].add(course)
-                self.courses_taken.add(course)
-
-                """ 
-                If the course we scheduled is a high-level elective requirement, then we want to store the course 
-                we used to fulfill this elective requirement so that the course is not used again for the same elective.
-                """
-                if self.is_elective(course):
-                    self.add_elective_course(course, chosen_prerequisites)
+            if self.schedule_in(course,i,chosen_prerequisites):
                 return True
+        return False
+        
+        """Tries to schedule a course in a particular semester."""
+    def schedule_in(self, course, semester, chosen_prerequisites=None):
+        if self.__can_schedule(course, semester) and self.__requirements_satisfied(course, semester):
+            self.scheduled[semester].add(course)
+            self.courses_taken.add(course)
+
+            """ 
+            If the course we scheduled is a high-level elective requirement, then we want to store the course 
+            we used to fulfill this elective requirement so that the course is not used again for the same elective.
+            """
+            if self.is_elective(course):
+                self.add_elective_course(course, chosen_prerequisites)
+            return True
         return False
 
     def add_elective_course(self, elective, courses):

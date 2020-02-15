@@ -2,9 +2,11 @@ import sys
 import heapq
 
 from course_heuristic import course_heuristic
-from schedule import Schedule
+from schedule import Schedule,max_semester
 
 DEBUG = (sys.argv[1] == "debug") if len(sys.argv) > 1 else False
+
+MIN_CREDITS = 12
 
 
 def log(msg=""):
@@ -92,6 +94,30 @@ def search(frontier, schedule):
 
     return True
 
+def fill_semesters(course_descriptions, schedule):
+    """
+       Fills a schedule with random available classes until each has at least 12 hours.
+       Stops filling early when either all remaining semesters have 0 hours, or there are no more available classes to add.
+    """
+    # find the semester where we stop filling
+    stop_semester = max_semester+1
+    for sem in range(max_semester,0,-1):
+        if schedule.get_total_credits(sem) == 0:
+            stop_semester = sem
+        else:
+            break
+    
+    
+    #for each semester that must be filled, try to add all courses as long as we need to add more
+    for sem in range(1,stop_semester):
+        added_course = True #added_course is false if we can't add anything else to this semester
+        while schedule.get_total_credits(sem) < MIN_CREDITS and added_course:
+            added_course = False
+            for course in course_descriptions.keys():
+                if schedule.schedule_in(course,sem):
+                    added_course = True
+                    break
+
 
 def course_scheduler(course_descriptions, goal_conditions, initial_state):
     """
@@ -102,5 +128,6 @@ def course_scheduler(course_descriptions, goal_conditions, initial_state):
     frontier = []
     append_to_queue(frontier, goal_conditions)
     search(frontier, schedule)
+    fill_semesters(course_descriptions,schedule)
     return schedule.get_plan()
 
