@@ -3,6 +3,7 @@ class Tree(object):
     def __init__(self, data):
         self.data = data
         self.children = []
+        self.max_depth = 0
 
     def add_child(self, obj):
         self.children.append(obj)
@@ -13,12 +14,15 @@ class Tree(object):
         return True;
 
     def get_depth(self):
+        return self.max_depth
+
+    def calculate_depth(self):
         if not self.has_children():
-            return 0
+            return 1
         else:
             maxDepth = 0
             for allChildren in self.children:
-                newMax = allChildren.get_depth()
+                newMax = allChildren.calculate_depth()
                 if newMax > maxDepth:
                     maxDepth = newMax
             return 1 + maxDepth

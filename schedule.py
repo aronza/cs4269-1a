@@ -1,5 +1,7 @@
 from collections import namedtuple
 from copy import deepcopy
+from tree import Tree
+from itertools import chain
 
 Course = namedtuple('Course', 'program, designation')
 CourseInfo = namedtuple('CourseInfo', 'credits, terms, prereqs')
@@ -8,6 +10,14 @@ season_translation = {0: 'Spring', 1: 'Fall'}
 max_semester = 8
 MAX_CREDITS = 18
 
+
+
+def flatten (list):
+    toReturn = set()
+    for prereqs in list:
+        for course in prereqs:
+            toReturn.add(course)
+    return toReturn
 
 def find_elective_groups(catalog):
     """
@@ -35,6 +45,7 @@ def find_elective_groups(catalog):
     return groups
 
 
+
 def get_scheduled_term(semester):
     """
     Translate indexes to expected String representation
@@ -53,6 +64,7 @@ class Schedule:
         self.dict = course_catalog
         # Groups of high-level elective groups that must be satisfied by different courses.
         self.elective_groups = find_elective_groups(self.dict)
+        self.heuristic_dictionary = {}
 
         # List of sets of courses scheduled for self.elective_groups
         self.electives_taken = [set() for i in range(len(self.elective_groups))]
@@ -138,10 +150,6 @@ class Schedule:
         return total
 
     def get_plan(self):
-        """
-        :return: Returns the scheduled courses in expected (course_key, semester_scheduled, credits)
-         Ex: ((“CS”, “2201”), (“Spring”, “Frosh”), 3).
-        """
         plan = []
 
         for semester in range(1, max_semester + 1):
@@ -196,6 +204,27 @@ class Schedule:
             schedule_str += '\n'
 
         return schedule_str
+
+    def build_prereq_tree(self, goal_conditions):
+        for course in goal_conditions:
+            prereqs = self.get_prereqs(course)
+            root = Tree(course)
+            prereqSet = flatten(prereqs)
+            if prereqSet == set():
+                root.max_depth = 1
+                self.heuristic_dictionary[course] = root.max_depth
+                return root
+            else:
+                depths = []
+                for prereq in prereqSet:
+                    # if not self.is_elective(prereq):
+                        toAdd = self.build_prereq_tree([prereq])
+                        root.add_child(toAdd)
+                        depths.append(toAdd.max_depth + 1)
+                root.max_depth = max(depths)
+                self.heuristic_dictionary[prereq] = root.max_depth
+                return root
+
 
     # def have_elective_course(self, elective, courses):
     #     """
