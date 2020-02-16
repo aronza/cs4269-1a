@@ -13,7 +13,7 @@ course_translation = {1: 'Frosh', 3: 'Soph', 5: 'Junior', 7: 'Senior'}
 season_translation = {0: 'Spring', 1: 'Fall'}
 max_semester = 8
 MAX_CREDITS = 18
-
+MIN_CREDITS = 12
 
 def flatten(list_of_lists):
     """
@@ -199,6 +199,7 @@ class Schedule:
 
         :return: List of tuples in (course_key, scheduled_term, course_credits) format
         """
+        self.fill_semesters()
         plan = []
 
         for semester in range(1, max_semester + 1):
@@ -290,6 +291,32 @@ class Schedule:
                 root.max_depth = max(depths)
 
                 return root
+
+    def fill_semesters(self):
+        """
+        Fills a schedule with random available classes until each has at least 12 hours.
+        Stops filling early when either all remaining semesters have 0 hours, or there are no more available classes to add.
+
+        :param course_descriptions: @see course_scheduler(course_descriptions, goal_conditions, initial_state)
+        :param schedule: @see schedule.py
+        """
+        # find the semester where we stop filling
+        stop_semester = max_semester + 1
+        for sem in range(max_semester, 0, -1):
+            if self.get_total_credits(sem) == 0:
+                stop_semester = sem
+            else:
+                break
+
+        # for each semester that must be filled, try to add all courses as long as we need to add more
+        for sem in range(1, stop_semester):
+            added_course = True  # added_course is false if we can't add anything else to this semester
+            while self.get_total_credits(sem) < MIN_CREDITS and added_course:
+                added_course = False
+                for course in self.dict.keys():
+                    if self.schedule_in(course, sem):
+                        added_course = True
+                        break
 
     def __str__(self):
         """

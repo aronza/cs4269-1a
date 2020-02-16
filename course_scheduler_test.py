@@ -137,6 +137,10 @@ def main():
 
 
 if __name__ == "__main__":
+    # import profile
+    # import re
+    #
+    # profile.run('re.compile("course_scheduler_test.py|bar")')
     """
         Driver function that parses the command-line argument and calls the necessary functions.
         If the program is in test mode, call the test_with_catalog function on every catalog file in data/test_cases
