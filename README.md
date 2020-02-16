@@ -1,6 +1,7 @@
 # CS-4269 Project Part 1a
 
 Team Number: 10
+
 Members: Noah Popham, Arda Turkmen, Mark Weinstein, Harry Wilson 
 
 ## To set up the project:
@@ -19,7 +20,8 @@ To run the scheduler with the default catalog(the one given in the specification
 
 To test the course_scheduler against our custom unit tests, execute command "python3 course_scheduler_test.py test"
 
-To debug and see the indiviual steps the scheduler is taking, execute command "python3 course_scheduler_test.py debug". This option will print out messages to show the progress of the search function
+To debug and see the indiviual steps the scheduler is taking, execute command "python3 course_scheduler_test.py debug". 
+This option will print out messages to show the progress of the search function
 
 ## Changing goal conditions and initial state:
 
