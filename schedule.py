@@ -11,9 +11,9 @@ Course = namedtuple('Course', 'program, designation')
 CourseInfo = namedtuple('CourseInfo', 'credits, terms, prereqs')
 course_translation = {1: 'Frosh', 3: 'Soph', 5: 'Junior', 7: 'Senior'}
 season_translation = {0: 'Spring', 1: 'Fall'}
-max_semester = 8
 MAX_CREDITS = 18
 MIN_CREDITS = 12
+
 
 def flatten(list_of_lists):
     """
@@ -72,6 +72,7 @@ class Schedule:
         A class that abstracts any detail/functionality about the scheduling problem.
         It also stores the courses scheduled so far.
     """
+
     def __init__(self, course_catalog, initial_state, goal_conditions):
         # Course catalog given in course_definitions used to lookup course information
         self.dict = course_catalog
@@ -80,6 +81,8 @@ class Schedule:
         self.heuristic_dictionary = {}
         self.goal_conditions = goal_conditions
         self.build_prereq_tree(goal_conditions)
+        self.max_semester = 8
+
 
         # List of sets of courses scheduled for self.elective_groups
         self.electives_taken = [set() for i in range(len(self.elective_groups))]
@@ -87,7 +90,7 @@ class Schedule:
         self.courses_taken = set(initial_state)
         # List of sets of courses scheduled for each semester. 0 is initial state, 1 to 8 (inclusive) is Fall Frosh
         # to Spring Senior.
-        self.scheduled = {i: set() for i in range(max_semester + 1)}
+        self.scheduled = {i: set() for i in range(self.max_semester + 1)}
 
         self.scheduled[0] = set(initial_state)
 
@@ -134,6 +137,9 @@ class Schedule:
                 return True
         return False
 
+    def num_of_courses_scheduled(self):
+        return len(self.courses_taken)
+
     def schedule(self, course, chosen_prerequisites=None):
         """
         Attempts to schedule the class in the earliest semester possible. A semester has to have less than 18 credits
@@ -148,7 +154,7 @@ class Schedule:
         if course in self.courses_taken:
             return True
 
-        for i in range(1, max_semester + 1):
+        for i in range(1, self.max_semester + 1):
             if self.schedule_in(course, i, chosen_prerequisites):
                 return True
         return False
@@ -202,7 +208,7 @@ class Schedule:
         self.fill_semesters()
         plan = []
 
-        for semester in range(1, max_semester + 1):
+        for semester in range(1, self.max_semester + 1):
             for course in self.scheduled[semester]:
                 plan.append((course, get_scheduled_term(semester), self.get_credits(course)))
         return plan
@@ -301,8 +307,8 @@ class Schedule:
         :param schedule: @see schedule.py
         """
         # find the semester where we stop filling
-        stop_semester = max_semester + 1
-        for sem in range(max_semester, 0, -1):
+        stop_semester = self.max_semester + 1
+        for sem in range(self.max_semester, 0, -1):
             if self.get_total_credits(sem) == 0:
                 stop_semester = sem
             else:
@@ -326,7 +332,7 @@ class Schedule:
         """
         schedule_str = ""
 
-        for i in range(1, max_semester + 1):
+        for i in range(1, self.max_semester + 1):
             schedule_str += str(get_scheduled_term(i)) + ": "
             schedule_str += str(list(filter(lambda course: not self.is_high_level(course), self.scheduled[i])))
             schedule_str += " Credits: " + str(self.get_total_credits(i))
@@ -335,5 +341,3 @@ class Schedule:
             schedule_str += '\n'
 
         return schedule_str
-
-

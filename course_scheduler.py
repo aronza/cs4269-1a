@@ -114,11 +114,23 @@ def course_scheduler(course_descriptions, goal_conditions, initial_state):
     :param initial_state: A list of courses the student has already taken
     :return: A List of scheduled courses in format (course, scheduled_term, course_credits)
     """
+    depths = range(1, 9)
+    best_schedule = None
+    best_schedule_num = float('inf')
 
-    schedule = Schedule(course_descriptions, initial_state, goal_conditions)
+    for depth in depths:
+        schedule = Schedule(course_descriptions, initial_state, goal_conditions)
+        schedule.max_semester = depth
 
-    frontier = []
-    append_to_queue(frontier, goal_conditions, schedule)
-    search(frontier, schedule)
+        frontier = []
+        append_to_queue(frontier, goal_conditions, schedule)
+        search(frontier, schedule)
 
-    return schedule.get_plan()
+        if 0 < schedule.num_of_courses_scheduled() < best_schedule_num:
+            best_schedule = schedule
+            best_schedule_num = schedule.num_of_courses_scheduled()
+
+    print("num of courses: ")
+    print(best_schedule.num_of_courses_scheduled())
+
+    return best_schedule
