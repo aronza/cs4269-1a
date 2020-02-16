@@ -1,3 +1,7 @@
+"""
+    Team Number: 10
+    Members: Noah Popham, Arda Turkmen, Mark Weinstein, Harry Wilson
+"""
 import sys
 import os
 import re
@@ -58,41 +62,45 @@ def print_dict(dict):
         print(key, dict[key])
 
 
-def test(test_file_path, expected_result):
+def test_with_catalog(catalog_file_path, expected_type):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        catalog = create_course_dict(test_file_path)
+        catalog = create_course_dict(catalog_file_path)
+        validate_catalog(catalog)
 
         schedule = course_scheduler(course_descriptions=catalog, goal_conditions=[('CS', 'major')], initial_state=[])
         courses_scheduled = set(map(lambda scheduled_course: scheduled_course[0], schedule))
 
-        if expected_result == "empty":
+        if expected_type == "empty":
             return courses_scheduled == set()
-        if expected_result == "have_all":
+        if expected_type == "have_all":
             return catalog.keys() == courses_scheduled
-        if expected_result == "have_subset":
+        if expected_type == "have_subset":
             expectedPrograms = ['A', 'B', 'C', 'CS']
             expectedCourses = set(filter(lambda course: course.program in expectedPrograms, catalog.keys()))
             return expectedCourses.issubset(courses_scheduled)
-        raise NameError(expected_result + " is not a valid test option")
+        raise NameError(expected_type + " is not a valid test option")
+
+
+def validate_catalog(catalog):
+    # Test to see if all prereqs are in the file.
+    prereq_list = [single_course for vals in catalog.values()
+                   for some_prereqs in vals.prereqs for single_course in some_prereqs]
+    for prereq in prereq_list:
+        if prereq not in catalog:
+            print(prereq)
+    for key in catalog:
+        # Test to see if every course has a term and credits.
+        if not catalog[key].terms or not catalog[key].credits:
+            print(key)
+        # Test to see if a course's prereqs include the course itself
+        if key in [course for prereq in catalog[key].prereqs for course in prereq]:
+            print(key)
 
 
 def main(argv):
-    test = create_course_dict()
-
-    # Test to see if all prereqs are in the file.
-    prereq_list = [single_course for vals in test.values()
-                   for some_prereqs in vals.prereqs for single_course in some_prereqs]
-    for prereq in prereq_list:
-        if prereq not in test:
-            print(prereq)
-    for key in test:
-        # Test to see if every course has a term and credits.
-        if not test[key].terms or not test[key].credits:
-            print(key)
-        # Test to see if a course's prereqs include the course itself
-        if key in [course for prereq in test[key].prereqs for course in prereq]:
-            print(key)
+    course_catalog = create_course_dict()
+    validate_catalog(course_catalog)
 
     goal = [('CS', 'major')]
     courses_taken = []
@@ -100,7 +108,7 @@ def main(argv):
     print("Goal: " + str(goal))
     print("Initial State: " + str(courses_taken))
     print()
-    schedule = course_scheduler(course_descriptions=test, goal_conditions=goal, initial_state=courses_taken)
+    schedule = course_scheduler(course_descriptions=course_catalog, goal_conditions=goal, initial_state=courses_taken)
     print()
     print("Result:")
     if type(schedule) is list:
@@ -114,6 +122,8 @@ if __name__ == "__main__":
 
     if TEST:
         test_folder = os.path.join(os.path.dirname(__file__), 'data/test_cases/')
+        tests_failed = 0
+        test_count = 0
 
         for test_filename in os.listdir(test_folder):
             file_path = os.path.join(test_folder, test_filename)
@@ -127,7 +137,13 @@ if __name__ == "__main__":
                 expected = "have_all"
 
             print("Test " + expected + " " + file_path)
-            test_result = test(file_path, expected)
+            test_result = test_with_catalog(file_path, expected)
             print("\tPASS" if test_result else "\tFAIL")
+
+            if not test_result:
+                tests_failed += 1
+            test_count += 1
+
+        print(tests_failed, " Tests Failed. Number of tests run: ", test_count)
     else:
         main(sys.argv)

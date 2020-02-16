@@ -1,7 +1,11 @@
+"""
+    Team Number: 10
+    Members: Noah Popham, Arda Turkmen, Mark Weinstein, Harry Wilson
+"""
+
 from collections import namedtuple
 from copy import deepcopy
 from tree import Tree
-from itertools import chain
 
 Course = namedtuple('Course', 'program, designation')
 CourseInfo = namedtuple('CourseInfo', 'credits, terms, prereqs')
@@ -106,12 +110,13 @@ class Schedule:
             return True
 
         for i in range(1, max_semester + 1):
-            if self.schedule_in(course,i,chosen_prerequisites):
+            if self.schedule_in(course, i, chosen_prerequisites):
                 return True
         return False
         
-        """Tries to schedule a course in a particular semester."""
     def schedule_in(self, course, semester, chosen_prerequisites=None):
+        """Tries to schedule a course in a particular semester."""
+
         if self.__can_schedule(course, semester) and self.__requirements_satisfied(course, semester):
             self.scheduled[semester].add(course)
             self.courses_taken.add(course)
@@ -224,16 +229,3 @@ class Schedule:
                 root.max_depth = max(depths)
                 self.heuristic_dictionary[prereq] = root.max_depth
                 return root
-
-
-    # def have_elective_course(self, elective, courses):
-    #     """
-    #
-    #     :param elective: Elective course that parameter courses will satisfy.
-    #     :param courses: Requirement courses for the elective course
-    #     :return: Return True if the parameter course is scheduled for the group elective course is in.
-    #     """
-    #     for index, group in enumerate(self.elective_groups):
-    #         if elective in group:
-    #             return courses[0] in self.electives_taken[index]
-    #     raise NameError(str(elective) + " couldn't be found in any elective groups")

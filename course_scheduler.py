@@ -1,8 +1,13 @@
+"""
+    Team Number: 10
+    Members: Noah Popham, Arda Turkmen, Mark Weinstein, Harry Wilson
+"""
+
 import sys
 import heapq
 
 from course_heuristic import course_heuristic
-from schedule import Schedule,max_semester
+from schedule import Schedule, max_semester
 from tree import Tree
 
 DEBUG = (sys.argv[1] == "debug") if len(sys.argv) > 1 else False
@@ -18,13 +23,13 @@ def log(msg=""):
         print(msg)
 
 
-def append_to_queue(frontier, courses, heuristic_dictionary):
+def append_to_queue(frontier, courses, schedule):
     """
         Add a list of courses to the search queue after assigning each a heuristic value
     """
     for course in courses:
         if course not in frontier:
-            value = course_heuristic(heuristic_dictionary, course)
+            value = course_heuristic(schedule, course)
             heapq.heappush(frontier, (value, course))
 
 
@@ -70,7 +75,7 @@ def search(frontier, schedule):
 
             schedule_copy = schedule.copy()
             new_frontier = []
-            append_to_queue(new_frontier, prerequisites, schedule.heuristic_dictionary)
+            append_to_queue(new_frontier, prerequisites, schedule)
 
             log("Trying Prerequisite")
             log(str(prerequisites))
@@ -95,27 +100,27 @@ def search(frontier, schedule):
 
     return True
 
+
 def fill_semesters(course_descriptions, schedule):
     """
        Fills a schedule with random available classes until each has at least 12 hours.
        Stops filling early when either all remaining semesters have 0 hours, or there are no more available classes to add.
     """
     # find the semester where we stop filling
-    stop_semester = max_semester+1
-    for sem in range(max_semester,0,-1):
+    stop_semester = max_semester + 1
+    for sem in range(max_semester, 0, -1):
         if schedule.get_total_credits(sem) == 0:
             stop_semester = sem
         else:
             break
-    
-    
-    #for each semester that must be filled, try to add all courses as long as we need to add more
-    for sem in range(1,stop_semester):
-        added_course = True #added_course is false if we can't add anything else to this semester
+
+    # for each semester that must be filled, try to add all courses as long as we need to add more
+    for sem in range(1, stop_semester):
+        added_course = True  # added_course is false if we can't add anything else to this semester
         while schedule.get_total_credits(sem) < MIN_CREDITS and added_course:
             added_course = False
             for course in course_descriptions.keys():
-                if schedule.schedule_in(course,sem):
+                if schedule.schedule_in(course, sem):
                     added_course = True
                     break
 
@@ -127,11 +132,9 @@ def course_scheduler(course_descriptions, goal_conditions, initial_state):
     """
     schedule = Schedule(course_descriptions, initial_state)
 
-
     my_root = Tree("Root Node")
-    myLength = len(goal_conditions)
     max_depth = 0
-    if myLength > 1:
+    if len(goal_conditions) > 1:
         for condition in goal_conditions:
             toAdd = schedule.build_prereq_tree([condition])
             my_root.add_child(toAdd)
@@ -140,13 +143,10 @@ def course_scheduler(course_descriptions, goal_conditions, initial_state):
                 max_depth = new_depth
     else:
         my_root = schedule.build_prereq_tree(goal_conditions)
-        max_depth = my_root.get_depth()
-
-    # print (schedule.heuristic_dictionary[('CS', 'major')])
-
 
     frontier = []
-    append_to_queue(frontier, goal_conditions, schedule.heuristic_dictionary)
+    append_to_queue(frontier, goal_conditions, schedule)
     search(frontier, schedule)
-    fill_semesters(course_descriptions,schedule)
+    fill_semesters(course_descriptions, schedule)
+
     return schedule.get_plan()

@@ -1,3 +1,9 @@
+"""
+    Team Number: 10
+    Members: Noah Popham, Arda Turkmen, Mark Weinstein, Harry Wilson
+"""
+
+
 class Tree(object):
 
     def __init__(self, data):
