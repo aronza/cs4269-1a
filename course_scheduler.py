@@ -117,20 +117,19 @@ def course_scheduler(course_descriptions, goal_conditions, initial_state):
     depths = range(1, 9)
     best_schedule = None
     best_schedule_num = float('inf')
-
+    schedule = Schedule(course_descriptions, initial_state, goal_conditions)
+    empty_schedule = schedule.copy()
     for depth in depths:
-        schedule = Schedule(course_descriptions, initial_state, goal_conditions)
         schedule.max_semester = depth
+        schedule.assign(empty_schedule)
 
         frontier = []
         append_to_queue(frontier, goal_conditions, schedule)
         search(frontier, schedule)
 
         if 0 < schedule.num_of_courses_scheduled() < best_schedule_num:
-            best_schedule = schedule
+            best_schedule = schedule.copy()
             best_schedule_num = schedule.num_of_courses_scheduled()
 
-    print("num of courses: ")
-    print(best_schedule.num_of_courses_scheduled())
-
-    return best_schedule
+    schedule.assign(best_schedule)
+    return schedule.get_plan()
