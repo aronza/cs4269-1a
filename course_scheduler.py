@@ -8,7 +8,6 @@ import heapq
 
 from course_heuristic import course_heuristic
 from schedule import Schedule, max_semester
-from tree import Tree
 
 DEBUG = (sys.argv[1] == "debug") if len(sys.argv) > 1 else False
 
@@ -18,6 +17,8 @@ MIN_CREDITS = 12
 def log(msg=""):
     """
     Helper Function to print out a debugging message if DEBUG mode is on. (Any parameters are given to program)
+
+    :param msg: Message to be printed
     """
     if DEBUG:
         print(msg)
@@ -25,7 +26,11 @@ def log(msg=""):
 
 def append_to_queue(frontier, courses, schedule):
     """
-        Add a list of courses to the search queue after assigning each a heuristic value
+    Add a list of courses to the search queue after assigning each a heuristic value
+
+    :param frontier: The priority queue to add courses to
+    :param courses: A list of courses to be added
+    :param schedule: @see schedule.py
     """
     for course in courses:
         if course not in frontier:
@@ -103,8 +108,11 @@ def search(frontier, schedule):
 
 def fill_semesters(course_descriptions, schedule):
     """
-       Fills a schedule with random available classes until each has at least 12 hours.
-       Stops filling early when either all remaining semesters have 0 hours, or there are no more available classes to add.
+    Fills a schedule with random available classes until each has at least 12 hours.
+    Stops filling early when either all remaining semesters have 0 hours, or there are no more available classes to add.
+
+    :param course_descriptions: @see course_scheduler(course_descriptions, goal_conditions, initial_state)
+    :param schedule: @see schedule.py
     """
     # find the semester where we stop filling
     stop_semester = max_semester + 1
@@ -127,22 +135,16 @@ def fill_semesters(course_descriptions, schedule):
 
 def course_scheduler(course_descriptions, goal_conditions, initial_state):
     """
-        State consists of a conjunction of courses/high-level requirements that are to be achieved.
-        When conjunction set is empty a viable schedule should be in the schedule_set.
-    """
-    schedule = Schedule(course_descriptions, initial_state)
+    State consists of a conjunction of courses/high-level requirements that are to be achieved.
+    When conjunction set is empty a viable schedule should be in the schedule_set.
 
-    my_root = Tree("Root Node")
-    max_depth = 0
-    if len(goal_conditions) > 1:
-        for condition in goal_conditions:
-            toAdd = schedule.build_prereq_tree([condition])
-            my_root.add_child(toAdd)
-            new_depth = toAdd.get_depth()
-            if new_depth > max_depth:
-                max_depth = new_depth
-    else:
-        my_root = schedule.build_prereq_tree(goal_conditions)
+    :param course_descriptions: Course catalog. A Python dictionary that uses Course as key and CourseInfo as value
+    :param goal_conditions: A list of courses or high-level requirements that a viable schedule would need to fulfill
+    :param initial_state: A list of courses the student has already taken
+    :return: A List of scheduled courses in format (course, scheduled_term, course_credits)
+    """
+
+    schedule = Schedule(course_descriptions, initial_state, goal_conditions)
 
     frontier = []
     append_to_queue(frontier, goal_conditions, schedule)

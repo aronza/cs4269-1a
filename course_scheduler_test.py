@@ -17,14 +17,14 @@ Course = namedtuple('Course', 'program, designation')
 CourseInfo = namedtuple('CourseInfo', 'credits, terms, prereqs')
 
 
-def create_course_dict(file_path="data/CourseCatalogSpring2020.xlsx"):
+def create_course_dict(dictionary_file_path="data/CourseCatalogSpring2020.xlsx"):
     """
     Creates a dictionary containing course info.
     Keys: namedtuple of the form ('program, designation')
     Values: namedtuple of the form('name, prereqs, credits')
             prereqs is a tuple of prereqs where each prereq has the same form as the keys
     """
-    wb = load_workbook(file_path)
+    wb = load_workbook(dictionary_file_path)
     catalog = wb.get_sheet_by_name('catalog')
 
     course_dict = {}
@@ -62,7 +62,17 @@ def print_dict(dict):
         print(key, dict[key])
 
 
-def test_with_catalog(catalog_file_path, expected_type):
+def test_with_catalog(catalog_file_path, test_type):
+    """
+    Tests the course_scheduler with a catalog in the given file path and the type of test that needs to be applied
+
+    :param catalog_file_path: Absolute path to the excel file holding course catalog data.
+    :param test_type: Current options are empty, have_all and have_subset.
+        Empty expects an empty schedule because there is no viable schedule to be completed in 4 years.
+        Have_all expects the returned schedule to include all the courses in the catalog.
+        Have_subset expects the returned schedule to include a subset of the courses in the catalog.
+    :return: True if test passes, else if it doesn't.
+    """
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         catalog = create_course_dict(catalog_file_path)
@@ -71,18 +81,23 @@ def test_with_catalog(catalog_file_path, expected_type):
         schedule = course_scheduler(course_descriptions=catalog, goal_conditions=[('CS', 'major')], initial_state=[])
         courses_scheduled = set(map(lambda scheduled_course: scheduled_course[0], schedule))
 
-        if expected_type == "empty":
+        if test_type == "empty":
             return courses_scheduled == set()
-        if expected_type == "have_all":
+        if test_type == "have_all":
             return catalog.keys() == courses_scheduled
-        if expected_type == "have_subset":
+        if test_type == "have_subset":
             expectedPrograms = ['A', 'B', 'C', 'CS']
             expectedCourses = set(filter(lambda course: course.program in expectedPrograms, catalog.keys()))
             return expectedCourses.issubset(courses_scheduled)
-        raise NameError(expected_type + " is not a valid test option")
+        raise NameError(test_type + " is not a valid test option")
 
 
 def validate_catalog(catalog):
+    """
+    Given code to test if the catalog makes sense.
+
+    :param catalog: Python dictionary holding the catalog
+    """
     # Test to see if all prereqs are in the file.
     prereq_list = [single_course for vals in catalog.values()
                    for some_prereqs in vals.prereqs for single_course in some_prereqs]
@@ -98,7 +113,11 @@ def validate_catalog(catalog):
             print(key)
 
 
-def main(argv):
+def main():
+    """
+    Main function that creates the default dictionary and runs the course_scheduler with ('CS', 'major') as goal
+    and an empty initial State.
+    """
     course_catalog = create_course_dict()
     validate_catalog(course_catalog)
 
@@ -118,6 +137,10 @@ def main(argv):
 
 
 if __name__ == "__main__":
+    """
+        Driver function that parses the command-line argument and calls the necessary functions.
+        If the program is in test mode, call the test_with_catalog function on every catalog file in data/test_cases
+    """
     TEST = (sys.argv[1] == "test") if len(sys.argv) > 1 else False
 
     if TEST:
@@ -146,4 +169,4 @@ if __name__ == "__main__":
 
         print(tests_failed, " Tests Failed. Number of tests run: ", test_count)
     else:
-        main(sys.argv)
+        main()

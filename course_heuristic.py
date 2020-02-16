@@ -3,6 +3,7 @@
     Members: Noah Popham, Arda Turkmen, Mark Weinstein, Harry Wilson
 """
 
+
 def course_heuristic(schedule, course):
     """
     This heuristic function assigns a heuristic value to a course, based on problem details stored in the schedule class
@@ -12,6 +13,5 @@ def course_heuristic(schedule, course):
     :return: The heuristic value (smaller the number, higher the priority it will get in the search)
     """
     if course in schedule.heuristic_dictionary:
-        return -schedule.heuristic_dictionary[course]
+        return schedule.heuristic_dictionary[course] + (0 if schedule.is_program_in_goal(course[0]) else 10)
     return 0
-
